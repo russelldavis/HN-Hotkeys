@@ -186,6 +186,16 @@ $(document).ready(function(){
     $('textarea').focus();
   }
 
+  window.addEventListener("click", function(event) {
+    foundIndex = selectables.toArray().findIndex(function(el) {
+      return el.contains(event.target);
+    });
+    if (foundIndex !== -1) {
+      cur = foundIndex;
+      select(selectables.eq(cur), false);
+    }
+  });
+
   // So cells don't show when highlighted
   $('table').attr('cellspacing', 0)
             .attr('cellpadding', 0);
