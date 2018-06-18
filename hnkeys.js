@@ -169,7 +169,7 @@ $(document).ready(function(){
   , { key: "s"
     , handler: function() { downvote(selectables.eq(cur)); }
     }
-  , { key: "x"
+  , { key: "i"
     , handler: function() { selectables = toggleExpanded(selectables.eq(cur)); }
     }
   ];
