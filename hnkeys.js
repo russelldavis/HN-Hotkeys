@@ -43,44 +43,48 @@ function isScrolledIntoView (el) {
     && (elemBottom <= docViewBottom) &&  (elemTop >= docViewTop) );
 }
 
-function getLink (titlerow, path) {
+function getCommentsUrl (titlerow) {
  // Items pages — when title is selected, opens the article
-  if (path === '/item') {
-    link = titlerow.find('.title a').first();
-    return link;
+  if (window.location.pathname === '/item') {
+    link = titlerow.find('.title a')[0];
+    return link && link.href;
   }
 
   // Comments link
-  link = titlerow.next().find('a[href^=item]').first();
-  if (link.length) return link;
+  link = titlerow.next().find('a[href^=item]')[0];
+  if (link) return link.href;
 
   // Some items don't have a comments link - fall back to the title link
-  link = titlerow.find('.title a').first()
-  return link;
+  link = titlerow.find('.title a')[0]
+  return link && link.href;
 }
 
+// Returns a link's URL, unless it points to the current page
+function isCurrentUrl(url) {
+  let fullPath = window.location.pathname + window.location.search;
+  return ("/" + url) == fullPath;
+}
+
+// Opens comment link in selected row in new tab
+// If row only contains 'more' link, opens that in same tab
+function openTitle (titlerow) {
+  let link = titlerow.find('.title a')[0];
+  let url = link && link.href;
+  if (url && !isCurrentUrl(url)) location.href = url;
+}
 
 // Opens comment link in selected row in new tab
 // If row only contains 'more' link, opens that in same tab
 function openComments (titlerow) {
-  var link
-    , path = window.location.pathname
-    , fullPath = path + window.location.search;
-
   // More link - open in same tab
-  link = titlerow.find('a[href^=/x?], a[href^=news]').first();
-  if (link.length) {
-    location.href = link.attr('href');
+  let moreLink = titlerow.find('a[href^=/x?], a[href^=news]').first();
+  if (moreLink.length) {
+    location.href = moreLink.attr('href');
     return;
   }
 
-  link = getLink(titlerow, path);
-
-  // Don't open a link to the current page
-  if (link.length && "/" + link.attr('href') != fullPath) {
-    window.open(link.attr('href'), "_blank");
-    console.log('tried to open: ' + link.text());
-  }
+  url = getCommentsUrl(titlerow);
+  if (url && !isCurrentUrl(url)) window.open(url, "_blank");
 }
 
 function toggleExpanded (row) {
@@ -158,7 +162,7 @@ $(document).ready(function(){
     , handler: function() { openComments(selectables.eq(cur)); }
     }
   , { key: "return"
-    , handler: function() { openComments(selectables.eq(cur)); }
+    , handler: function() { openTitle(selectables.eq(cur)); }
     }
   , { key: "r"
     , handler: function() { reply(selectables.eq(cur)); return false; }
