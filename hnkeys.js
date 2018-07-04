@@ -65,26 +65,18 @@ function isCurrentUrl(url) {
   return ("/" + url) == fullPath;
 }
 
-// Opens comment link in selected row in new tab
-// If row only contains 'more' link, opens that in same tab
-function openTitle (titlerow) {
-  let link = titlerow.find('.title a')[0];
-  let url = link && link.href;
-  if (url && !isCurrentUrl(url)) location.href = url;
-}
-
-// Opens comment link in selected row in new tab
-// If row only contains 'more' link, opens that in same tab
-function openComments (titlerow) {
-  // More link - open in same tab
+function openLink (titlerow, newTab) {
+  // More link - always open in same tab
   let moreLink = titlerow.find('a[href^=/x?], a[href^=news]').first();
-  if (moreLink.length) {
-    location.href = moreLink.attr('href');
-    return;
-  }
+  let url = moreLink.length ? moreLink.attr('href') : getCommentsUrl(titlerow);
 
-  url = getCommentsUrl(titlerow);
-  if (url && !isCurrentUrl(url)) window.open(url, "_blank");
+  if (url && !isCurrentUrl(url)) {
+    if (newTab) {
+      window.open(url, "_blank");
+    } else {
+      location.href = url;
+    }
+  }
 }
 
 function toggleExpanded (row) {
@@ -159,10 +151,10 @@ $(document).ready(function(){
     , handler: function() { cur = moveUp(selectables, cur); }
     }
   , { key: "o"
-    , handler: function() { openComments(selectables.eq(cur)); }
+    , handler: function() { openLink(selectables.eq(cur), true); }
     }
   , { key: "return"
-    , handler: function() { openTitle(selectables.eq(cur)); }
+    , handler: function() { openLink(selectables.eq(cur), false); }
     }
   , { key: "r"
     , handler: function() { reply(selectables.eq(cur)); return false; }
